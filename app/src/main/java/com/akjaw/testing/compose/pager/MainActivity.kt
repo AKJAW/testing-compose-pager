@@ -14,7 +14,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,7 +59,7 @@ fun MainScreen() {
                         title = "Dynamic",
                         onClose = { destination = Destination.Home }
                     ) {
-                        Text(text = "Dynamic")
+                        DynamicPagerScreen()
                     }
                 }
                 Destination.StaticPager -> {
