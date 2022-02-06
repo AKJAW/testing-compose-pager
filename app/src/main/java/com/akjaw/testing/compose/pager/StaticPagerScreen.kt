@@ -4,25 +4,19 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Button
-import androidx.compose.material.ScrollableTabRow
 import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.akjaw.testing.compose.pager.ui.theme.TestingComposePagerTheme
@@ -31,38 +25,46 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
-import kotlin.math.max
 
-object TestTagsDynamicPagerScreen {
+object TestTagsStaticPagerScreen {
 
-    private const val page = "dynamic-pager"
-    const val tabRow = "dynamic-pager-tab-row"
+    private const val page = "static-pager"
+    const val tabRow = "static-pager-tab-row"
 
-    fun getPageTag(index: Int) = "$page-$index"
+    fun getPageTag(page: StaticPagerScreenPage) = "$page-${page.ordinal}"
+}
+
+enum class StaticPagerScreenPage {
+    Summary,
+    Info,
+    Details,
 }
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun DynamicPagerScreen() {
+fun StaticPagerScreen() {
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
-    var pageCount by remember {
-        mutableStateOf(1)
+    val pages = remember {
+        listOf(
+            StaticPagerScreenPage.Summary,
+            StaticPagerScreenPage.Info,
+            StaticPagerScreenPage.Details,
+        )
     }
-    val pages = remember(pageCount) { List(pageCount) { "Page $it" } }
     Column {
-        ScrollableTabRow(
+        TabRow(
             selectedTabIndex = pagerState.currentPage,
             indicator = { tabPositions ->
                 TabRowDefaults.Indicator(
                     Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
                 )
             },
-            modifier = Modifier.testTag(TestTagsDynamicPagerScreen.tabRow),
+            modifier = Modifier.testTag(TestTagsStaticPagerScreen.tabRow),
         ) {
-            pages.forEachIndexed { index, title ->
+            pages.forEachIndexed { index, page ->
                 Tab(
-                    text = { Text(title) },
+                    text = { Text(page.name) },
                     selected = pagerState.currentPage == index,
                     onClick = { scope.launch { pagerState.scrollToPage(index) } },
                 )
@@ -71,58 +73,66 @@ fun DynamicPagerScreen() {
         HorizontalPager(
             count = pages.size,
             state = pagerState,
-        ) { page ->
+        ) { index ->
+            val page = pages[index]
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .testTag(TestTagsDynamicPagerScreen.getPageTag(page))
+                    .testTag(TestTagsStaticPagerScreen.getPageTag(page))
             ) {
-                DynamicPageContent(
-                    decreasePageCount = { pageCount = max(1, pageCount - 1) },
-                    increasePageCount = { pageCount += 1 },
-                    page = page,
-                )
+                when (page) {
+                    StaticPagerScreenPage.Summary -> SummaryContent(
+                        onInformationClicked = {
+                            scope.launch { pagerState.animateScrollToPage(1) }
+                        },
+                        onDetailsClicked = {
+                            scope.launch { pagerState.animateScrollToPage(2) }
+                        },
+                    )
+                    StaticPagerScreenPage.Info -> InformationContent()
+                    StaticPagerScreenPage.Details -> DetailsContent()
+                }
             }
         }
     }
 }
 
 @Composable
-private fun DynamicPageContent(
-    decreasePageCount: () -> Unit,
-    increasePageCount: () -> Unit,
-    page: Int,
+private fun SummaryContent(
+    onInformationClicked: () -> Unit,
+    onDetailsClicked: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceEvenly
+        Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "On page: $page",
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            style = TextStyle(fontSize = 22.sp),
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Button(onClick = decreasePageCount) {
-                Text(text = "Decrease")
-            }
-            Button(onClick = increasePageCount) {
-                Text(text = "Increase")
-            }
+        Text(text = "The Summary page", style = TextStyle(fontSize = 22.sp))
+        Button(onClick = onInformationClicked) {
+            Text(text = "Go to info")
+        }
+        Button(onClick = onDetailsClicked) {
+            Text(text = "Go to details")
         }
     }
+
+}
+
+@Composable
+private fun InformationContent() {
+    Text(text = "The Information page", style = TextStyle(fontSize = 22.sp))
+}
+
+@Composable
+private fun DetailsContent() {
+    Text(text = "The Details page", style = TextStyle(fontSize = 22.sp))
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
-private fun DynamicPagerScreenPreview() {
+private fun StaticPagerScreenPreview() {
     TestingComposePagerTheme {
-        DynamicPagerScreen()
+        StaticPagerScreen()
     }
 }

@@ -67,7 +67,7 @@ fun MainScreen() {
                         title = "Static",
                         onClose = { destination = Destination.Home }
                     ) {
-                        Text(text = "Static")
+                        StaticPagerScreen()
                     }
                 }
             }
