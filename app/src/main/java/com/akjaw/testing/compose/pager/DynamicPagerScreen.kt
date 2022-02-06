@@ -20,6 +20,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,6 +32,14 @@ import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import kotlin.math.max
+
+object TestTagsDynamicPagerScreen {
+
+    private const val page = "dynamic-pager"
+    const val tabRow = "dynamic-pager-tab-row"
+
+    fun getPageTag(index: Int) = "$page-$index"
+}
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
@@ -48,7 +57,8 @@ fun DynamicPagerScreen() {
                 TabRowDefaults.Indicator(
                     Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
                 )
-            }
+            },
+            modifier = Modifier.testTag(TestTagsDynamicPagerScreen.tabRow),
         ) {
             pages.forEachIndexed { index, title ->
                 Tab(
@@ -62,11 +72,15 @@ fun DynamicPagerScreen() {
             count = pages.size,
             state = pagerState,
         ) { page ->
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag(TestTagsDynamicPagerScreen.getPageTag(page))
+            ) {
                 DynamicPageContent(
                     decreasePageCount = { pageCount = max(1, pageCount - 1) },
                     increasePageCount = { pageCount += 1 },
-                    pageTitle = pages[page],
+                    page = page,
                 )
             }
         }
@@ -77,14 +91,14 @@ fun DynamicPagerScreen() {
 private fun DynamicPageContent(
     decreasePageCount: () -> Unit,
     increasePageCount: () -> Unit,
-    pageTitle: String,
+    page: Int,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
         Text(
-            text = pageTitle,
+            text = "On page: $page",
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = TextStyle(fontSize = 22.sp),
