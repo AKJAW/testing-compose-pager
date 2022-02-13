@@ -35,10 +35,10 @@ import kotlin.math.max
 
 object TestTagsDynamicPagerScreen {
 
-    private const val page = "dynamic-pager"
+    private const val pager = "dynamic-pager"
     const val tabRow = "dynamic-pager-tab-row"
 
-    fun getPageTag(index: Int) = "$page-$index"
+    fun getPageTag(index: Int) = "$pager-$index"
 }
 
 @OptIn(ExperimentalPagerApi::class)
@@ -46,9 +46,7 @@ object TestTagsDynamicPagerScreen {
 fun DynamicPagerScreen() {
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
-    var pageCount by remember {
-        mutableStateOf(1)
-    }
+    var pageCount by remember { mutableStateOf(1) }
     val pages = remember(pageCount) { List(pageCount) { "Page $it" } }
     Column {
         ScrollableTabRow(
@@ -71,16 +69,16 @@ fun DynamicPagerScreen() {
         HorizontalPager(
             count = pages.size,
             state = pagerState,
-        ) { page ->
+        ) { index ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .testTag(TestTagsDynamicPagerScreen.getPageTag(page))
+                    .testTag(TestTagsDynamicPagerScreen.getPageTag(index))
             ) {
                 DynamicPageContent(
                     decreasePageCount = { pageCount = max(1, pageCount - 1) },
                     increasePageCount = { pageCount += 1 },
-                    page = page,
+                    page = index,
                 )
             }
         }

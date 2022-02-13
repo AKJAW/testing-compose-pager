@@ -1,6 +1,7 @@
 package com.akjaw.testing.compose.pager
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -28,7 +29,18 @@ class StaticPagerScreenTest {
     }
 
     @Test
-    fun clickingGoToInfoOpensTheInfoTab() {
+    fun theSecondPageIsInTheNodeTree() {
+        composeTestRule.onNodeWithText("The Summary page").assertIsDisplayed()
+        composeTestRule.onNodeWithText("The Information page").assertIsNotDisplayed()
+    }
+
+    @Test
+    fun theThirdPageDoesNotExistInTheNodeTree() {
+        composeTestRule.onNodeWithText("The Details page").assertDoesNotExist()
+    }
+
+    @Test
+    fun clickingGoToInfoOpensTheInfoPage() {
         composeTestRule.onNodeWithText("Go to info").performClick()
 
         composeTestRule.onNodeWithText("Info").assertIsSelected()
@@ -36,7 +48,15 @@ class StaticPagerScreenTest {
     }
 
     @Test
-    fun swipingTwoTimesLeftOpensTheDetailsTab() {
+    fun clickingInfoTabOpensTheInfoPage() {
+        composeTestRule.onNodeWithText("Info").performClick()
+
+        composeTestRule.onNodeWithText("Info").assertIsSelected()
+        composeTestRule.onNodeWithText("The Information page").assertIsDisplayed()
+    }
+
+    @Test
+    fun swipingLeftOnRootTwoTimesOpensTheDetailsPage() {
         composeTestRule.onRoot().performTouchInput {
             swipeLeft()
             swipeLeft()

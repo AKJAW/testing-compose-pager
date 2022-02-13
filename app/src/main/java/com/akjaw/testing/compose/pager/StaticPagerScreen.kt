@@ -28,10 +28,10 @@ import kotlinx.coroutines.launch
 
 object TestTagsStaticPagerScreen {
 
-    private const val page = "static-pager"
+    private const val pager = "static-pager"
     const val tabRow = "static-pager-tab-row"
 
-    fun getPageTag(page: StaticPagerScreenPage) = "$page-${page.ordinal}"
+    fun getPageTag(page: StaticPagerScreenPage) = "$pager-${page.ordinal}"
 }
 
 enum class StaticPagerScreenPage {
